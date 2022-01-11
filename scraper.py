@@ -1,4 +1,7 @@
 import pandas as pd
+import os
+import smtplib
+import json
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -41,6 +44,32 @@ def parse_video(video):
     'description':description
   }
 
+def send_email(body):
+  SENDER_Email = 'trendingvideoselenium@gmail.com'
+  RECIEVER_Email = 'trendingvideoselenium@gmail.com'
+  SENDER_PASSWORD = os.environ['Password']
+  print("password",SENDER_PASSWORD)
+  try:
+    server_ssl = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+    server_ssl.ehlo() 
+
+    subject = 'Yotube trending video'
+    body = body
+    email_text = f"""
+    From: {SENDER_Email}
+    To: {RECIEVER_Email}
+    Subject: {subject}
+    {body}
+    """
+    
+    server_ssl.login(SENDER_Email,SENDER_PASSWORD )
+    server_ssl.sendmail(SENDER_Email, RECIEVER_Email, email_text)
+    server_ssl.close()
+
+    print ('Email sent!')
+
+  except:
+    print ('Something went wrong...')
 
 if __name__ == "__main__":
   print('Creating driver')
@@ -59,5 +88,12 @@ if __name__ == "__main__":
 
   print(videos_df)
   videos_df.to_csv('trending.csv',index=None)
+
+  body = json.dumps(videos_data, indent=2)
+
+  print("Sending data over e-mail")
+  send_email(body)
+  
+  print("Finished")
 
   
